@@ -18,6 +18,7 @@ test('Login to Swag Labs', async ({ page }) => {
   await page.locator('[data-test="username"]').fill('standard_user');
   await page.locator('[data-test="password"]').fill('secret_sauce');
   await page.locator('[data-test="login-button"]').click();
+  // verify that the user is logged in by checking for the presence of the products page elements
   await expect(page.locator('[data-test="product-sort-container"]')).toBeVisible();
   await expect(page.locator('[data-test="shopping-cart-link"]')).toBeVisible();
   });
