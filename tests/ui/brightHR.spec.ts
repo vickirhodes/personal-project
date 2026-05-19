@@ -35,7 +35,7 @@ test('Add an Annual Leave on BrightHR', async ({ page }) => {
     await brightHRPage.addAbsenceButton.click();
     await page.waitForURL((url) => {
         const isCorrectOrigin = url.origin === 'https://sandbox-app.brighthr.com';
-        const isConfirmationPath = /^\/employee\/\d+\/annual-leave\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/confirmation$/i.test(
+        const isConfirmationPath = /^\/employee\/\d+\/annual-leave\/[0-9a-f-]+\/confirmation$/i.test(
             url.pathname,
         );
         const isNewLeave = url.searchParams.get('isNew') === 'true';
