@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SwagLabsPage } from './pages/swagLabs.page';
+import { SwagLabsPage } from '../pages/swagLabs.page';
 
 test('Go to Swag Labs and verify elements', async ({ page }) => {
 

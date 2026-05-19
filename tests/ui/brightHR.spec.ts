@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BrightHRPage } from './pages/brightHR.page';
+import { BrightHRPage } from '../pages/brightHR.page';
 
 test('Add an Annual Leave on BrightHR', async ({ page }) => {
 
