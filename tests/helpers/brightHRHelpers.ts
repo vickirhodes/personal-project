@@ -1,46 +1,28 @@
-import { expect, APIRequestContext } from '@playwright/test';
+import { APIRequestContext } from '@playwright/test';
+import { buildAuthPayload, buildHolidayPayload } from '../factories/brightHR.factory';
 
 const BRIGHTHR_LOGIN_URL = 'https://sandbox-login.brighthr.com/connect/token';
 const BRIGHTHR_API_URL = 'https://sandbox-api.brighthr.com';
 const EMPLOYEE_ID = '1301514';
 const HOLIDAY_DATE = '2026-07-13';
 
-const env =
-  (globalThis as { process?: { env?: Record<string, string | undefined> } })
-    .process?.env ?? {};
-
-const AUTH_FORM = {
-  client_id: env.BRIGHTHR_CLIENT_ID ?? 'blip-android',
-  client_secret: env.BRIGHTHR_CLIENT_SECRET ?? 'R0ck5uper*',
-  grant_type: 'password',
-  username: env.BRIGHTHR_USERNAME ?? 'victoriauk7@getnada.com',
-  password: env.BRIGHTHR_PASSWORD ?? 'A123456789',
-};
-
-function extractAccessToken(body: Record<string, unknown>): string {
-  const token = body.access_token ?? body.accessToken ?? body.token;
-  expect(typeof token).toBe('string');
-  return token as string;
-}
-
 export async function getBrightHRToken(
   request: APIRequestContext,
-): Promise<string> {
+): Promise<{ status: number; body: Record<string, unknown> }> {
   const response = await request.post(BRIGHTHR_LOGIN_URL, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    form: AUTH_FORM,
+    form: buildAuthPayload(),
   });
 
-  expect(response.status()).toBe(200);
-  return extractAccessToken(await response.json());
+  return { status: response.status(), body: await response.json() };
 }
 
 export async function addHoliday(
   request: APIRequestContext,
   token: string,
-): Promise<{ id: string }> {
+): Promise<{ status: number; body: Record<string, unknown> }> {
   const response = await request.post(
     `${BRIGHTHR_API_URL}/absence/request/holiday/part/employee/${EMPLOYEE_ID}`,
     {
@@ -48,29 +30,19 @@ export async function addHoliday(
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      data: {
-        startLocalDate: HOLIDAY_DATE,
-        endLocalDate: HOLIDAY_DATE,
-        userId: EMPLOYEE_ID,
-        startPartOfDay: 'FullDay',
-        endPartOfDay: 'FullDay',
-      },
+      data: buildHolidayPayload(EMPLOYEE_ID, HOLIDAY_DATE),
     },
   );
 
-  expect(response.status()).toBe(200);
-  const body = await response.json();
-  expect(body).toHaveProperty('id');
-  expect(typeof body.id).toBe('string');
-  return { id: body.id as string };
+  return { status: response.status(), body: await response.json() };
 }
 
 export async function deleteHoliday(
   request: APIRequestContext,
   token: string,
   holidayId: string,
-): Promise<void> {
-  const deleteResponse = await request.delete(
+): Promise<{ status: number }> {
+  const response = await request.delete(
     `${BRIGHTHR_API_URL}/absence/employee/${EMPLOYEE_ID}/holiday/${holidayId}`,
     {
       headers: {
@@ -79,5 +51,5 @@ export async function deleteHoliday(
     },
   );
 
-  expect(deleteResponse.status()).toBe(204);
+  return { status: response.status() };
 }
